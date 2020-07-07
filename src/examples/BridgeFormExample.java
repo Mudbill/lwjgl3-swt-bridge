@@ -12,6 +12,7 @@ import net.buttology.lwjgl.swt.BridgeConfig;
 import net.buttology.lwjgl.swt.BridgeContext;
 import net.buttology.lwjgl.swt.BridgeException;
 import net.buttology.lwjgl.swt.GLComposite;
+import net.buttology.lwjgl.swt.input.BridgeKeyboardState;
 
 public class BridgeFormExample {
 
@@ -62,12 +63,14 @@ public class BridgeFormExample {
 		comp.setLayout(new FillLayout(SWT.VERTICAL));
 		Label label = new Label(comp, SWT.NONE);
 		label.setText("test");
-		
+				
 		BridgeConfig config = new BridgeConfig()
-				.setLooping(true)
 				.setFPSLimit(240)
-				.createInputListeners(true)
+				.withMouseListener()
 				.setContext(new BridgeContext() {
+					
+					private BridgeKeyboardState keyboard = composite.getKeyboard();
+					
 					@Override
 					public void init() {
 						System.out.println("Init context...");
@@ -78,6 +81,14 @@ public class BridgeFormExample {
 					public void update() {
 						GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 						label.setText("Frametime ms: "+composite.getDeltaTime() + "\nFPS: " + composite.getFramerate());
+						if(keyboard != null) {							
+							if(keyboard.isKeyDown('a')) {
+								GL11.glClearColor(0, 1, 0, 1);
+							}
+							if(keyboard.isKeyDown('w')) {
+								GL11.glClearColor(0, 0, 1, 1);
+							}
+						}
 					}
 
 					@Override

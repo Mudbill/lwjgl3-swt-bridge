@@ -1,15 +1,18 @@
 package net.buttology.lwjgl.swt;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.internal.gtk.OS;
 import org.eclipse.swt.opengl.GLCanvas;
 import org.eclipse.swt.opengl.GLData;
 import org.eclipse.swt.widgets.Composite;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+
+import net.buttology.lwjgl.swt.input.BridgeKeyboardInputManagerGeneric;
+import net.buttology.lwjgl.swt.input.BridgeKeyboardInputManagerWin32;
+import net.buttology.lwjgl.swt.input.BridgeKeyboardState;
 
 /**
  * Instances of this class contains a full-sized canvas for drawing OpenGL content to.
@@ -33,6 +36,12 @@ public class GLComposite extends Composite {
 	/** Stores the thread runnable responsible for updating the OpenGL context continuously */
 	private final GLCompositeUpdater UPDATER;
 	
+	/** Used for tracking keyboard key pressed state */
+	private BridgeKeyboardState keyboardStates;
+	
+	/** The stack layout which displays the canvas on top and keeps listening widgets below and hidden */
+	private StackLayout layout;
+	
 	/**
 	 * Constructs a new instance of this class given its parent, a style value describing its behavior, appearance and drawing calls.<br><br>
 	 * The style value is either one of the style constants defined in class SWT which is applicable to instances of {@link Composite}, or must be built by bitwise OR'ing together (that is, using the int "|" operator) two or more of those SWT style constants. The class description of <link>Composite</link> lists the style constants that are applicable to the class. 
@@ -46,7 +55,8 @@ public class GLComposite extends Composite {
 		this.glData = new GLData();
 		this.glData.doubleBuffer = true;
 		this.UPDATER = new GLCompositeUpdater(this);
-		this.setLayout(new FillLayout());
+		this.layout = new StackLayout();
+		this.setLayout(layout);
 	}
 	
 	/**
@@ -71,11 +81,13 @@ public class GLComposite extends Composite {
 		if(config.getContext() == null) {
 			throw new NullPointerException("Cannot init non-existent context. Context missing from config.");
 		}
+		
 		if(hasInit) {
 			throw new BridgeException("Call to init on already initialized context.");
 		}
 		
 		canvas = new GLCanvas(this, SWT.NONE, glData);
+		layout.topControl = canvas;
 		canvas.setCurrent();
 		GL.createCapabilities();
 		config.getContext().init();
@@ -90,15 +102,36 @@ public class GLComposite extends Composite {
 			GL11.glViewport(0, 0, bounds.width, bounds.height);
 		});
 		
-		canvas.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				System.out.println(e);
+		if(config.hasKeyboardListener()) {
+			if(OS.IsWin32) {
+				keyboardStates = new BridgeKeyboardInputManagerWin32(this);
 			}
-			public void keyReleased(KeyEvent e) {
-				System.out.println(e);
+			else {
+				keyboardStates = new BridgeKeyboardInputManagerGeneric(this);
 			}
-		});
+			
+			canvas.addListener(SWT.FocusIn, e -> {
+				System.out.println("got focus, passing to wrapper");
+				keyboardStates.setFocus();
+			});
+			
+			canvas.addListener(SWT.FocusOut, e -> {
+				System.out.println("lost focus");
+			});
+			
+			canvas.addListener(SWT.MouseDown, e -> {
+				System.out.println("got click, passing focus to wrapper");
+				keyboardStates.setFocus();
+			});
+			
+			canvas.setFocus();
+		}
 		
+		if(config.hasMouseListener()) {
+			
+		}
+		
+		hasInit = true;
 		getParent().getDisplay().asyncExec(UPDATER);
 	}
 	
@@ -138,7 +171,11 @@ public class GLComposite extends Composite {
 		return UPDATER.getFramerate();
 	}
 	
-	GLCanvas getCanvas() {
+	public BridgeKeyboardState getKeyboard() {
+		return keyboardStates;
+	}
+	
+	public GLCanvas getCanvas() {
 		return canvas;
 	}
 }

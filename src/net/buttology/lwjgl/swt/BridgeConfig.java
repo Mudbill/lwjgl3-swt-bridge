@@ -6,10 +6,10 @@ public class BridgeConfig {
 	private BridgeContext context = null;
 	
 	/** Whether to enable the updater */
-	private boolean looping = false;
-	
-	/** Whether to listen for inputs */
-	private boolean listening = false;
+	private boolean looping = true;
+		
+	private boolean listenForKeyboard = false;
+	private boolean listenForMouse = false;
 	
 	/** The rate, per second, at which update calls are executed */
 	private int fpsLimit = 60;
@@ -26,8 +26,13 @@ public class BridgeConfig {
 		return this;
 	}
 	
-	public BridgeConfig createInputListeners(boolean x) {
-		this.listening = x;
+	public BridgeConfig withKeyboardListener() {
+		this.listenForKeyboard = true;
+		return this;
+	}
+	
+	public BridgeConfig withMouseListener() {
+		this.listenForMouse = true;
 		return this;
 	}
 	
@@ -44,8 +49,12 @@ public class BridgeConfig {
 		return context;
 	}
 	
-	public boolean hasInputListeners() {
-		return listening;
+	public boolean hasKeyboardListener() {
+		return listenForKeyboard;
+	}
+	
+	public boolean hasMouseListener() {
+		return listenForMouse;
 	}
 	
 	public int getFPSLimit() {
