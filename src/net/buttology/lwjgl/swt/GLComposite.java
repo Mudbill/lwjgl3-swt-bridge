@@ -1,9 +1,10 @@
 package net.buttology.lwjgl.swt;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.gtk.OS;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.opengl.GLCanvas;
 import org.eclipse.swt.opengl.GLData;
 import org.eclipse.swt.widgets.Composite;
@@ -40,7 +41,7 @@ public class GLComposite extends Composite {
 	private BridgeKeyboardState keyboardStates;
 	
 	/** The stack layout which displays the canvas on top and keeps listening widgets below and hidden */
-	private StackLayout layout;
+	private FormLayout layout;
 	
 	/**
 	 * Constructs a new instance of this class given its parent, a style value describing its behavior, appearance and drawing calls.<br><br>
@@ -55,7 +56,7 @@ public class GLComposite extends Composite {
 		this.glData = new GLData();
 		this.glData.doubleBuffer = true;
 		this.UPDATER = new GLCompositeUpdater(this);
-		this.layout = new StackLayout();
+		this.layout = new FormLayout();
 		this.setLayout(layout);
 	}
 	
@@ -86,11 +87,17 @@ public class GLComposite extends Composite {
 			throw new BridgeException("Call to init on already initialized context.");
 		}
 		
+		// Create layout data to fill the entire parent.
+		FormData fdata = new FormData();
+		fdata.top = new FormAttachment(0);
+		fdata.left = new FormAttachment(0);
+		fdata.bottom = new FormAttachment(100);
+		fdata.right = new FormAttachment(100);
+		
 		canvas = new GLCanvas(this, SWT.NONE, glData);
-		layout.topControl = canvas;
+		canvas.setLayoutData(fdata);
 		canvas.setCurrent();
 		GL.createCapabilities();
-		config.getContext().init();
 		
 		canvas.addListener(SWT.Dispose, e -> {
 			config.getContext().shutdown();
@@ -103,7 +110,7 @@ public class GLComposite extends Composite {
 		});
 		
 		if(config.hasKeyboardListener()) {
-			if(OS.IsWin32) {
+			if(System.getProperty("os.name").toLowerCase().contains("windows")) {				
 				keyboardStates = new BridgeKeyboardInputManagerWin32(this);
 			}
 			else {
@@ -111,26 +118,25 @@ public class GLComposite extends Composite {
 			}
 			
 			canvas.addListener(SWT.FocusIn, e -> {
-				System.out.println("got focus, passing to wrapper");
+//				System.out.println("canvas got focus, passing focus to wrapper");
 				keyboardStates.setFocus();
-			});
-			
-			canvas.addListener(SWT.FocusOut, e -> {
-				System.out.println("lost focus");
 			});
 			
 			canvas.addListener(SWT.MouseDown, e -> {
-				System.out.println("got click, passing focus to wrapper");
-				keyboardStates.setFocus();
+//				System.out.println("canvas got click, passing focus to canvas");
+				canvas.setFocus();
 			});
 			
-			canvas.setFocus();
+//			canvas.addListener(SWT.FocusOut, e -> {
+//				System.out.println("lost focus");
+//			});
 		}
 		
 		if(config.hasMouseListener()) {
-			
+			//TODO: add this
 		}
 		
+		config.getContext().init();
 		hasInit = true;
 		getParent().getDisplay().asyncExec(UPDATER);
 	}
@@ -155,26 +161,50 @@ public class GLComposite extends Composite {
 		return config;
 	}
 	
+	/**
+	 * Whether this canvas is the active OpenGL context.
+	 * @return
+	 */
 	public boolean isCurrent() {
 		return canvas.isCurrent();
 	}
 	
+	/**
+	 * Sets this canvas as the active context for OpenGL calls.
+	 */
 	public void setCurrent() {
 		canvas.setCurrent();
 	}
 	
+	/**
+	 * Get the time, in seconds, since last rendered frame.
+	 * @return delta time
+	 */
 	public double getDeltaTime() {
 		return UPDATER.getDeltaTime();
 	}
 	
+	/**
+	 * Get the number of recorded frames from the last second.
+	 * @return frames per second
+	 */
 	public int getFramerate() {
 		return UPDATER.getFramerate();
 	}
 	
-	public BridgeKeyboardState getKeyboard() {
+	/**
+	 * Get the keyboard capturing class, if created.
+	 * @return keyboard handler
+	 * @throws NullPointerException if not specified to be created in the config
+	 */
+	public BridgeKeyboardState getKeyboard() throws NullPointerException {
 		return keyboardStates;
 	}
 	
+	/**
+	 * Get a reference directly to the canvas.
+	 * @return the raw GLCanvas
+	 */
 	public GLCanvas getCanvas() {
 		return canvas;
 	}

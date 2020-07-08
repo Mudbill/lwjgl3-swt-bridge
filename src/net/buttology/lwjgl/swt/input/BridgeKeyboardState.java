@@ -51,10 +51,12 @@ public abstract class BridgeKeyboardState {
 	
 	void setKeyDown(char key, boolean value) {
 		this.charMap.put(key, value);
+//		System.out.println("setting " + key + " to " + value);
 	}
 	
 	void setKeyDown(int key, boolean value) {
 		this.maskMap.put(key, value);
+//		System.out.println("setting " + key + " to " + value);
 	}
 	
 }
