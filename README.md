@@ -1,3 +1,5 @@
+Some updates are pending before a release.
+
 # lwjgl3-swt-bridge
 
 ### What is it?
