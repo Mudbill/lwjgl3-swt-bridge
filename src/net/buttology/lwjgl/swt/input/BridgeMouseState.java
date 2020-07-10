@@ -71,10 +71,30 @@ public class BridgeMouseState {
 		return new Point(x, y);
 	}
 	
+	/**
+	 * Get the scroll wheel's current amount of scroll. Might change depending on the user's system configuration.
+	 * @return 0 if no scroll, a positive value for scroll up, a negative value for scroll down
+	 */
 	public int getScrollAmount() {
-		int x = scrollDelta;
+		return scrollDelta;
+	}
+	
+	/**
+	 * Gets the scroll wheel's current direction as a fixed value across systems.
+	 * @return 1 if up, -1 if down, 0 if no scroll
+	 */
+	public int getFixedScrollAmount() {
+		if(scrollDelta > 0) return 1;
+		if(scrollDelta < 0) return -1;
+		return 0;
+	}
+	
+	/**
+	 * This will reset the scroll amount stored from the last listened event.
+	 * This is called automatically after each update and is not necessary to call manually.
+	 */
+	public void resetScrollAmount() {
 		scrollDelta = 0;
-		return x;
 	}
 	
 	private void addListeners() {

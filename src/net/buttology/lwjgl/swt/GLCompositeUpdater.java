@@ -24,6 +24,9 @@ public class GLCompositeUpdater implements Runnable {
 	
 	/** Buffer to keep track of real frames between seconds */
 	private int fpsBuffer = 0;
+	
+	/** Stores an event that is invoked at the end of the update iteration */
+	private Callback postUpdateCallback = () -> {};
 
 	/**
 	 * Creates a new instance of this class for the given GLComposite. Only GLComposite should instantiate this class.
@@ -47,6 +50,10 @@ public class GLCompositeUpdater implements Runnable {
 	 */
 	public int getFramerate() {
 		return framerate;
+	}
+	
+	public void postUpdate(Callback cb) {
+		this.postUpdateCallback = cb;
 	}
 	
 	@Override
@@ -100,6 +107,8 @@ public class GLCompositeUpdater implements Runnable {
 			composite.setCurrent();
 			composite.getConfig().getContext().update();
 			composite.getCanvas().swapBuffers();
+			
+			postUpdateCallback.invoke();
 			
 			if(composite.getConfig().isLoopingEnabled()) {
 				composite.getParent().getDisplay().asyncExec(this);

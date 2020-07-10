@@ -122,22 +122,19 @@ public class GLComposite extends Composite {
 			}
 			
 			canvas.addListener(SWT.FocusIn, e -> {
-//				System.out.println("canvas got focus, passing focus to wrapper");
 				keyboardStates.setFocus();
 			});
 			
 			canvas.addListener(SWT.MouseDown, e -> {
-//				System.out.println("canvas got click, passing focus to canvas");
 				canvas.setFocus();
 			});
-			
-//			canvas.addListener(SWT.FocusOut, e -> {
-//				System.out.println("lost focus");
-//			});
 		}
 		
 		if(config.hasMouseListener()) {
 			mouseStates = new BridgeMouseState(this);
+			UPDATER.postUpdate(() -> {
+				mouseStates.resetScrollAmount();
+			});
 		}
 		
 		config.getContext().init();
