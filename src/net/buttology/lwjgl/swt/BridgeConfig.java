@@ -7,11 +7,14 @@ public class BridgeConfig {
 	
 	/** Whether to enable the updater */
 	private boolean looping = true;
-		
+	
+	/** Whether to create listeners for keyboard input when the context is initialized */
 	private boolean listenForKeyboard = false;
+
+	/** Whether to create listeners for mouse input when the context is initialized */
 	private boolean listenForMouse = false;
 	
-	/** The rate, per second, at which update calls are executed */
+	/** The rate, per second, at which update calls are limited to */
 	private int fpsLimit = 60;
 	
 	public BridgeConfig() {}
@@ -41,7 +44,7 @@ public class BridgeConfig {
 		return this;
 	}
 	
-	public boolean loopingEnabled() {
+	public boolean isLoopingEnabled() {
 		return looping;
 	}
 	

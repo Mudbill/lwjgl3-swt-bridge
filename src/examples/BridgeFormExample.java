@@ -68,7 +68,7 @@ public class BridgeFormExample {
 				.withKeyboardListener()
 				.withMouseListener()
 				.setContext(new BridgeContext() {
-										
+
 					@Override
 					public void init() {
 						System.out.println("Init context...");
