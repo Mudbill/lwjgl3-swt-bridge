@@ -41,7 +41,7 @@ public class BridgeConfig {
 		return this;
 	}
 	
-	public boolean loopingEnabled() {
+	public boolean isLoopingEnabled() {
 		return looping;
 	}
 	

@@ -68,7 +68,7 @@ public class BridgeFormExample {
 				.withKeyboardListener()
 				.withMouseListener()
 				.setContext(new BridgeContext() {
-										
+
 					@Override
 					public void init() {
 						System.out.println("Init context...");
@@ -87,6 +87,9 @@ public class BridgeFormExample {
 						}
 						if(composite.getKeyboard().isKeyDown(SWT.SHIFT)) {
 							GL11.glClearColor(1, 0, 1, 1);
+						}
+						if(composite.getMouse().getScrollAmount() == 3) {
+							System.out.println("asdasd");
 						}
 					}
 

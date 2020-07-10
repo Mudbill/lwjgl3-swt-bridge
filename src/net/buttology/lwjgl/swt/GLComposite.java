@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import net.buttology.lwjgl.swt.input.BridgeKeyboardInputManagerGeneric;
 import net.buttology.lwjgl.swt.input.BridgeKeyboardInputManagerWin32;
 import net.buttology.lwjgl.swt.input.BridgeKeyboardState;
+import net.buttology.lwjgl.swt.input.BridgeMouseState;
 
 /**
  * Instances of this class contains a full-sized canvas for drawing OpenGL content to.
@@ -39,6 +40,9 @@ public class GLComposite extends Composite {
 	
 	/** Used for tracking keyboard key pressed state */
 	private BridgeKeyboardState keyboardStates;
+	
+	/** Used for tracking mouse button pressed state */
+	private BridgeMouseState mouseStates;
 	
 	/** The stack layout which displays the canvas on top and keeps listening widgets below and hidden */
 	private FormLayout layout;
@@ -133,7 +137,7 @@ public class GLComposite extends Composite {
 		}
 		
 		if(config.hasMouseListener()) {
-			//TODO: add this
+			mouseStates = new BridgeMouseState(this);
 		}
 		
 		config.getContext().init();
@@ -199,6 +203,15 @@ public class GLComposite extends Composite {
 	 */
 	public BridgeKeyboardState getKeyboard() throws NullPointerException {
 		return keyboardStates;
+	}
+	
+	/**
+	 * Get the mouse capturing class, if created.
+	 * @return mouse handler
+	 * @throws NullPointerException if not specified to be created in the config
+	 */
+	public BridgeMouseState getMouse() throws NullPointerException {
+		return mouseStates;
 	}
 	
 	/**

@@ -8,7 +8,7 @@ public class GLCompositeUpdater implements Runnable {
 	private static final int ONE_SECOND_IN_NANOS = 1000000000;
 	
 	/** The GLComposite that this updater is associated with */
-	private GLComposite canvas;
+	private GLComposite composite;
 	
 	/** Stores the time, in milliseconds, between frames */
 	private double deltaTime;
@@ -27,10 +27,10 @@ public class GLCompositeUpdater implements Runnable {
 
 	/**
 	 * Creates a new instance of this class for the given GLComposite. Only GLComposite should instantiate this class.
-	 * @param canvas the composite holding the drawable canvas
+	 * @param composite the composite holding the drawable canvas
 	 */
-	GLCompositeUpdater(GLComposite canvas) {
-		this.canvas = canvas;
+	GLCompositeUpdater(GLComposite composite) {
+		this.composite = composite;
 	}
 	
 	/**
@@ -51,7 +51,7 @@ public class GLCompositeUpdater implements Runnable {
 	
 	@Override
 	public void run() {
-		if(!canvas.isDisposed()) {
+		if(!composite.isDisposed()) {
 			// Get current time to compare with previous time
 			long thisTime = System.nanoTime();
 			
@@ -59,7 +59,7 @@ public class GLCompositeUpdater implements Runnable {
 			long currentNanoDiff = thisTime - lastTime;
 						
 			// Calculate what the minimum difference since last frame should be in nanoseconds
-			long desiredNanoDiff = ONE_SECOND_IN_NANOS / canvas.getConfig().getFPSLimit();
+			long desiredNanoDiff = ONE_SECOND_IN_NANOS / composite.getConfig().getFPSLimit();
 			
 			// Calculate the difference between the current and desired differences.
 			long comparedNanoDiff = desiredNanoDiff - currentNanoDiff;
@@ -97,12 +97,12 @@ public class GLCompositeUpdater implements Runnable {
 			fpsBuffer++;
 
 			// Set the current drawable canvas and call the update for it
-			canvas.setCurrent();
-			canvas.getConfig().getContext().update();
-			canvas.getCanvas().swapBuffers();
+			composite.setCurrent();
+			composite.getConfig().getContext().update();
+			composite.getCanvas().swapBuffers();
 			
-			if(canvas.getConfig().loopingEnabled()) {
-				canvas.getParent().getDisplay().asyncExec(this);
+			if(composite.getConfig().isLoopingEnabled()) {
+				composite.getParent().getDisplay().asyncExec(this);
 			}
 		}
 	}
